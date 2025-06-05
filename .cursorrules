@@ -1,0 +1,10 @@
+- Use React functional components with hooks.
+- Avoid class components entirely.
+- Style with CSS Modules or Tailwind.
+- Animate transitions using CSS or Framer Motion for hover and tap effects.
+- Store user-defined filters using chrome.storage.local (not localStorage).
+- Persist the filter input across page reloads using the Chrome Extension API.
+- Show a right caret icon on each request row that navigates to a detail screen.
+- In the detail screen, allow copying individual headers.
+- Include copy buttons for request body and response body below each API entry in the list.
+- Follow Chrome Extension Manifest V3 architecture.

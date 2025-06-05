@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans antialiased;
+  }
+}
+
+@layer components {
+  .copy-button {
+    @apply px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded transition-colors;
+  }
+
+  .copy-button:hover {
+    @apply bg-gray-200;
+  }
+
+  .copy-button.copied {
+    @apply bg-green-100 text-green-700 border-green-300;
+  }
+
+  .method-badge {
+    @apply px-2 py-1 text-xs font-medium rounded-full;
+  }
+
+  .request-row {
+    @apply p-3 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer;
+  }
+
+  .request-row:last-child {
+    @apply border-b-0;
+  }
+}
