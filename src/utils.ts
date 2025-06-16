@@ -25,24 +25,33 @@ export function copyToClipboard(text: string): Promise<boolean> {
 }
 
 export function formatRequestForCopy(request: NetworkRequest): string {
-  const config = {
-    method: request.method,
-    url: request.url,
-    headers: request.requestHeaders,
-    ...(request.requestBody && { body: request.requestBody }),
-  };
+  // Return just the request payload/body
+  if (!request.requestBody) {
+    return ""; // No request body to copy
+  }
 
-  return JSON.stringify(config, null, 2);
+  // Try to format as JSON if possible, otherwise return as-is
+  const parsed = tryParseJson(request.requestBody);
+  if (typeof parsed === "object") {
+    return JSON.stringify(parsed, null, 2);
+  }
+
+  return request.requestBody;
 }
 
 export function formatResponseForCopy(request: NetworkRequest): string {
-  const response = {
-    status: request.status,
-    headers: request.responseHeaders,
-    body: request.responseBody ? tryParseJson(request.responseBody) : null,
-  };
+  // Return just the response body
+  if (!request.responseBody) {
+    return ""; // No response body to copy
+  }
 
-  return JSON.stringify(response, null, 2);
+  // Try to format as JSON if possible, otherwise return as-is
+  const parsed = tryParseJson(request.responseBody);
+  if (typeof parsed === "object") {
+    return JSON.stringify(parsed, null, 2);
+  }
+
+  return request.responseBody;
 }
 
 export function tryParseJson(text: string): any {

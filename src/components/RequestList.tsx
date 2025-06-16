@@ -150,11 +150,17 @@ export default function RequestList({
                 className={`copy-button ${
                   copiedItems.has(`req-${request.id}`) ? "copied" : ""
                 }`}
+                disabled={!request.requestBody}
+                title={
+                  request.requestBody
+                    ? "Copy request payload"
+                    : "No request body"
+                }
               >
                 <Copy size={12} className="inline mr-1" />
                 {copiedItems.has(`req-${request.id}`)
                   ? "Copied!"
-                  : "Copy Request"}
+                  : "Copy Payload"}
               </button>
 
               <button
@@ -168,6 +174,12 @@ export default function RequestList({
                 className={`copy-button ${
                   copiedItems.has(`res-${request.id}`) ? "copied" : ""
                 }`}
+                disabled={!request.responseBody}
+                title={
+                  request.responseBody
+                    ? "Copy response body"
+                    : "No response body"
+                }
               >
                 <Copy size={12} className="inline mr-1" />
                 {copiedItems.has(`res-${request.id}`)
