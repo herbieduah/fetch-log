@@ -1,4 +1,11 @@
-import { Search, RefreshCw, ChevronRight, Copy, Play } from "lucide-react";
+import {
+  Search,
+  RefreshCw,
+  ChevronRight,
+  Copy,
+  Play,
+  Loader2,
+} from "lucide-react";
 import { NetworkRequest } from "../types";
 import {
   getMethodColor,
@@ -64,7 +71,11 @@ export default function RequestList({
             <div className="text-4xl mb-4">🔍</div>
             <p className="text-lg font-medium mb-2">No API requests captured</p>
             <p className="text-sm mb-4">
-              Click "Start Debugging" to monitor network requests on this tab
+              Click "Start Debugging" to monitor network requests on this tab.
+              <br />
+              <span className="text-xs text-gray-500 mt-1 block">
+                Requests will appear here in real-time with loading indicators
+              </span>
             </p>
             <div className="flex gap-2 justify-center">
               <button
@@ -125,13 +136,23 @@ export default function RequestList({
                     >
                       {request.method}
                     </span>
-                    <span
-                      className={`text-sm font-medium ${getStatusColor(
-                        request.status
-                      )}`}
-                    >
-                      {request.status || "Pending"}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      {!request.status && (
+                        <Loader2
+                          size={12}
+                          className="animate-spin text-blue-500"
+                        />
+                      )}
+                      <span
+                        className={`text-sm font-medium ${
+                          !request.status
+                            ? "text-blue-600 font-semibold"
+                            : getStatusColor(request.status)
+                        }`}
+                      >
+                        {request.status ? request.status : "Loading..."}
+                      </span>
+                    </div>
                   </div>
                   <div
                     className="text-sm text-gray-900 break-all"
@@ -191,18 +212,29 @@ export default function RequestList({
                   }}
                   className={`copy-button ${
                     copiedItems.has(`res-${request.id}`) ? "copied" : ""
-                  }`}
+                  } ${!request.status ? "loading" : ""}`}
                   disabled={!request.responseBody}
                   title={
-                    request.responseBody
+                    !request.status
+                      ? "Response loading... Please wait for request to complete"
+                      : request.responseBody
                       ? "Copy response body"
-                      : "No response body"
+                      : "No response body available"
                   }
                 >
-                  <Copy size={12} className="inline mr-1" />
-                  {copiedItems.has(`res-${request.id}`)
-                    ? "Copied!"
-                    : "Copy Response"}
+                  {!request.status ? (
+                    <>
+                      <Loader2 size={12} className="inline mr-1 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={12} className="inline mr-1" />
+                      {copiedItems.has(`res-${request.id}`)
+                        ? "Copied!"
+                        : "Copy Response"}
+                    </>
+                  )}
                 </button>
               </div>
             </div>

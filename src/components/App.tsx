@@ -30,6 +30,19 @@ export default function App() {
     chrome.storage.local.set({ filter });
   }, [filter]);
 
+  // Auto-refresh for pending requests
+  useEffect(() => {
+    const hasPendingRequests = requests.some((request) => !request.status);
+
+    if (hasPendingRequests) {
+      const interval = setInterval(() => {
+        loadRequests();
+      }, 1000); // Poll every second when there are pending requests
+
+      return () => clearInterval(interval);
+    }
+  }, [requests]);
+
   const loadRequests = async () => {
     try {
       const response = await chrome.runtime.sendMessage({
@@ -141,7 +154,9 @@ export default function App() {
         currentView={currentView}
         onSettingsClick={() => setCurrentView("settings")}
         onTitleClick={() => setCurrentView("list")}
+        onRefresh={loadRequests}
         requestCount={filteredRequests.length}
+        requests={filteredRequests}
       />
       {renderCurrentView()}
     </div>

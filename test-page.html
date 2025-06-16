@@ -63,6 +63,9 @@
         <button onclick="testJSONPlaceholder()">Test GET Request</button>
         <button onclick="testPostRequest()">Test POST with Payload</button>
         <button onclick="testPutRequest()">Test PUT with Payload</button>
+        <button onclick="testSlowRequest()">
+          Test Slow Request (Loading Demo)
+        </button>
         <button onclick="testGraphQL()">Test GraphQL Request</button>
         <button onclick="testCustomAPI()">Test Custom API Pattern</button>
         <button onclick="testMultipleRequests()">Test Multiple Requests</button>
@@ -94,6 +97,10 @@
         <li>
           <strong>Test copy functionality</strong>: Click "Copy Payload" for
           POST/PUT requests and "Copy Response" for any request
+        </li>
+        <li>
+          <strong>Observe loading states</strong>: Watch for spinning indicators
+          next to "Loading..." status and in copy buttons
         </li>
       </ol>
 
@@ -206,6 +213,30 @@
           log(`Response: ${JSON.stringify(data).substring(0, 100)}...`, "info");
         } catch (error) {
           log(`❌ PUT request error: ${error.message}`, "error");
+        }
+      }
+
+      async function testSlowRequest() {
+        log("Testing slow request to demonstrate loading states...", "info");
+        log("🔄 Check the extension popup to see loading indicators!", "info");
+        try {
+          // httpbin.org/delay/3 creates a 3-second delay
+          const response = await fetch("https://httpbin.org/delay/3", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              message: "This request will take 3 seconds to complete",
+              timestamp: new Date().toISOString(),
+              purpose: "Demonstrate loading states in extension",
+            }),
+          });
+          const data = await response.json();
+          log(`✅ Slow request completed: ${response.status}`, "success");
+          log("Loading indicators should now disappear in extension", "info");
+        } catch (error) {
+          log(`❌ Slow request error: ${error.message}`, "error");
         }
       }
 
