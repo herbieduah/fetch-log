@@ -47,6 +47,20 @@ async function startDebugging(tabId: number) {
     await chrome.debugger.sendCommand({ tabId }, "Network.enable");
     console.log("Network monitoring enabled for tab:", tabId);
 
+    // Enable additional network events for better request body capture
+    try {
+      await chrome.debugger.sendCommand(
+        { tabId },
+        "Network.enableRequestInterception",
+        {
+          patterns: [{ urlPattern: "*" }],
+        }
+      );
+      console.log("Request interception enabled for tab:", tabId);
+    } catch (error) {
+      console.log("Request interception not available, continuing without it");
+    }
+
     // Add event listener (note: this adds globally, but we filter by tabId)
     chrome.debugger.onEvent.addListener((source, method, params) => {
       if (source.tabId === tabId) {
@@ -79,6 +93,9 @@ function handleNetworkEvent(method: string, params: any, tabId: number) {
     case "Network.loadingFinished":
       handleLoadingFinished(params, tabId);
       break;
+    case "Network.requestIntercepted":
+      handleRequestIntercepted(params, tabId);
+      break;
   }
 }
 
@@ -110,12 +127,24 @@ function handleRequestWillBeSent(params: any, tabId: number) {
     if (request.postData) {
       if (request.postData.data) {
         requestBody = request.postData.data;
+        console.log(
+          "Found request body in postData.data for:",
+          request.method,
+          request.url
+        );
       } else if (request.postData.params) {
         // Handle form data
         requestBody = request.postData.params
           .map((p: any) => `${p.name}=${p.value}`)
           .join("&");
+        console.log(
+          "Found request body in postData.params for:",
+          request.method,
+          request.url
+        );
       }
+    } else {
+      console.log("No postData found for:", request.method, request.url);
     }
 
     const networkRequest: NetworkRequest = {
@@ -131,6 +160,65 @@ function handleRequestWillBeSent(params: any, tabId: number) {
     };
 
     requests.set(requestId, networkRequest);
+
+    // Try to get request body using getRequestPostData if we don't have it
+    if (
+      !requestBody &&
+      ["POST", "PUT", "PATCH"].includes(request.method.toUpperCase())
+    ) {
+      tryGetRequestPostData(requestId, tabId);
+    }
+  }
+}
+
+async function tryGetRequestPostData(requestId: string, tabId: number) {
+  try {
+    const postData = (await chrome.debugger.sendCommand(
+      { tabId },
+      "Network.getRequestPostData",
+      { requestId }
+    )) as { postData: string };
+
+    const request = requests.get(requestId);
+    if (request && postData.postData) {
+      console.log("Got request body via getRequestPostData for:", requestId);
+      request.requestBody = postData.postData;
+      requests.set(requestId, request);
+    }
+  } catch (error) {
+    console.log("Could not get post data for request:", requestId, error);
+  }
+}
+
+function handleRequestIntercepted(params: any, tabId: number) {
+  const { interceptionId, request } = params;
+
+  // Continue the request without modification but capture the body
+  chrome.debugger
+    .sendCommand({ tabId }, "Network.continueInterceptedRequest", {
+      interceptionId,
+    })
+    .catch((error) => {
+      console.log("Failed to continue intercepted request:", error);
+    });
+
+  // If this request has a body and matches our criteria, update our stored request
+  if (request.postData) {
+    const existingRequest = Array.from(requests.values()).find(
+      (req) =>
+        req.url === request.url &&
+        req.method === request.method &&
+        req.tabId === tabId
+    );
+
+    if (existingRequest) {
+      console.log(
+        "Updating request body from intercepted request:",
+        existingRequest.id
+      );
+      existingRequest.requestBody = request.postData;
+      requests.set(existingRequest.id, existingRequest);
+    }
   }
 }
 

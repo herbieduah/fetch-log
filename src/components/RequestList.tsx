@@ -169,8 +169,10 @@ export default function RequestList({
                   }
                   title={
                     request.requestBody && request.requestBody.trim() !== ""
-                      ? "Copy request payload"
-                      : "No request body"
+                      ? `Copy request payload (${request.requestBody.length} chars)`
+                      : `No request body (method: ${
+                          request.method
+                        }, hasBody: ${!!request.requestBody})`
                   }
                 >
                   <Copy size={12} className="inline mr-1" />
