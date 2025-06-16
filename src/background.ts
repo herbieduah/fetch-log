@@ -21,7 +21,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
 });
 
 // Listen for tab updates (refresh)
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
   if (changeInfo.status === "loading" && tabId === activeTabId) {
     // Clear requests on tab refresh if setting is enabled
     const settings = await chrome.storage.local.get(["clearOnTabRefresh"]);
@@ -60,7 +60,7 @@ function handleNetworkEvent(method: string, params: any, tabId: number) {
       handleRequestWillBeSent(params, tabId);
       break;
     case "Network.responseReceived":
-      handleResponseReceived(params, tabId);
+      handleResponseReceived(params);
       break;
     case "Network.loadingFinished":
       handleLoadingFinished(params, tabId);
@@ -94,7 +94,7 @@ function handleRequestWillBeSent(params: any, tabId: number) {
   }
 }
 
-function handleResponseReceived(params: any, tabId: number) {
+function handleResponseReceived(params: any) {
   const { requestId, response } = params;
   const request = requests.get(requestId);
 
@@ -111,11 +111,11 @@ async function handleLoadingFinished(params: any, tabId: number) {
 
   if (request) {
     try {
-      const responseBody = await chrome.debugger.sendCommand(
+      const responseBody = (await chrome.debugger.sendCommand(
         { tabId },
         "Network.getResponseBody",
         { requestId }
-      );
+      )) as { body: string };
       request.responseBody = responseBody.body;
       requests.set(requestId, request);
     } catch (error) {
@@ -133,7 +133,7 @@ function clearRequestsForTab(tabId: number) {
 }
 
 // Message handling for popup communication
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   switch (request.action) {
     case "getRequests":
       const tabRequests = Array.from(requests.values()).filter(

@@ -1,11 +1,6 @@
 import { ArrowLeft, Copy } from "lucide-react";
 import { NetworkRequest } from "../types";
-import {
-  getMethodColor,
-  getStatusColor,
-  copyToClipboard,
-  tryParseJson,
-} from "../utils";
+import { getMethodColor, getStatusColor, copyToClipboard } from "../utils";
 import { useState } from "react";
 
 interface RequestDetailProps {
