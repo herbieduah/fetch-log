@@ -1,4 +1,4 @@
-import { Search, RefreshCw, ChevronRight, Copy } from "lucide-react";
+import { Search, RefreshCw, ChevronRight, Copy, Play } from "lucide-react";
 import { NetworkRequest } from "../types";
 import {
   getMethodColor,
@@ -16,6 +16,7 @@ interface RequestListProps {
   onFilterChange: (filter: string) => void;
   onRequestSelect: (request: NetworkRequest) => void;
   onRefresh: () => void;
+  onStartDebugging: () => void;
 }
 
 export default function RequestList({
@@ -24,6 +25,7 @@ export default function RequestList({
   onFilterChange,
   onRequestSelect,
   onRefresh,
+  onStartDebugging,
 }: RequestListProps) {
   const [copiedItems, setCopiedItems] = useState<Set<string>>(new Set());
 
@@ -61,16 +63,25 @@ export default function RequestList({
           <div className="text-center">
             <div className="text-4xl mb-4">🔍</div>
             <p className="text-lg font-medium mb-2">No API requests captured</p>
-            <p className="text-sm">
-              Browse to a page with API calls to see them here
+            <p className="text-sm mb-4">
+              Click "Start Debugging" to monitor network requests on this tab
             </p>
-            <button
-              onClick={onRefresh}
-              className="mt-4 flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
-            >
-              <RefreshCw size={16} />
-              Refresh
-            </button>
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={onStartDebugging}
+                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+              >
+                <Play size={16} />
+                Start Debugging
+              </button>
+              <button
+                onClick={onRefresh}
+                className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+              >
+                <RefreshCw size={16} />
+                Refresh
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -79,6 +79,23 @@ export default function App() {
     }
   };
 
+  const startDebugging = async () => {
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: "startDebugging",
+      });
+      if (response?.success) {
+        console.log("Debugging started successfully");
+        // Refresh requests after starting debugging
+        await loadRequests();
+      } else {
+        console.error("Failed to start debugging:", response?.error);
+      }
+    } catch (error) {
+      console.error("Failed to start debugging:", error);
+    }
+  };
+
   const filteredRequests = requests.filter((request) =>
     request.url.toLowerCase().includes(filter.toLowerCase())
   );
@@ -112,6 +129,7 @@ export default function App() {
               setCurrentView("detail");
             }}
             onRefresh={loadRequests}
+            onStartDebugging={startDebugging}
           />
         );
     }
