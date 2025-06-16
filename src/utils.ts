@@ -56,7 +56,12 @@ export function formatResponseForCopy(request: NetworkRequest): string {
 
 export function tryParseJson(text: string): any {
   try {
-    return JSON.parse(text);
+    // Trim whitespace and check if it looks like JSON
+    const trimmed = text.trim();
+    if (!trimmed || (!trimmed.startsWith("{") && !trimmed.startsWith("["))) {
+      return text;
+    }
+    return JSON.parse(trimmed);
   } catch {
     return text;
   }

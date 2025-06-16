@@ -108,7 +108,10 @@ export default function RequestList({
           const { baseUrl, functionName } = extractFunctionName(request.url);
 
           return (
-            <div key={request.id} className="last:border-b-0">
+            <div
+              key={request.id}
+              className="border-b border-gray-200 last:border-b-0"
+            >
               <div
                 className="request-row flex items-center justify-between"
                 onClick={() => onRequestSelect(request)}

@@ -155,8 +155,23 @@ async function handleLoadingFinished(params: any, tabId: number) {
         { tabId },
         "Network.getResponseBody",
         { requestId }
-      )) as { body: string };
-      request.responseBody = responseBody.body;
+      )) as { body: string; base64Encoded?: boolean };
+
+      // Decode base64 if needed
+      let decodedBody = responseBody.body;
+      if (responseBody.base64Encoded) {
+        try {
+          decodedBody = atob(responseBody.body);
+          console.log("Decoded base64 response body for request:", requestId);
+        } catch (decodeError) {
+          console.warn("Failed to decode base64 response body:", decodeError);
+          // Keep original if decode fails
+        }
+      } else {
+        console.log("Response body not base64 encoded for request:", requestId);
+      }
+
+      request.responseBody = decodedBody;
       requests.set(requestId, request);
     } catch (error) {
       // Response body might not be available
