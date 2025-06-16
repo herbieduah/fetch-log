@@ -104,6 +104,20 @@ function handleRequestWillBeSent(params: any, tabId: number) {
       ["POST", "PUT", "PATCH", "DELETE"].includes(request.method.toUpperCase()))
   ) {
     console.log("Capturing request:", request.url, request.method);
+
+    // Better request body extraction
+    let requestBody = undefined;
+    if (request.postData) {
+      if (request.postData.data) {
+        requestBody = request.postData.data;
+      } else if (request.postData.params) {
+        // Handle form data
+        requestBody = request.postData.params
+          .map((p: any) => `${p.name}=${p.value}`)
+          .join("&");
+      }
+    }
+
     const networkRequest: NetworkRequest = {
       id: requestId,
       url: request.url,
@@ -112,7 +126,7 @@ function handleRequestWillBeSent(params: any, tabId: number) {
       timestamp: timestamp * 1000,
       requestHeaders: request.headers || {},
       responseHeaders: {},
-      requestBody: request.postData?.data,
+      requestBody,
       tabId,
     };
 

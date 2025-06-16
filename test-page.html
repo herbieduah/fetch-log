@@ -91,6 +91,10 @@
         <li>
           <strong>Check the extension popup</strong> to see captured requests
         </li>
+        <li>
+          <strong>Test copy functionality</strong>: Click "Copy Payload" for
+          POST/PUT requests and "Copy Response" for any request
+        </li>
       </ol>
 
       <h2>Troubleshooting</h2>
@@ -229,18 +233,35 @@
       }
 
       async function testCustomAPI() {
-        log("Testing custom API pattern...", "info");
+        log("Testing function name URL pattern...", "info");
         try {
-          const response = await fetch("https://httpbin.org/json", {
-            headers: {
-              Accept: "application/json",
-            },
-          });
+          // Test with a URL that has a function name like your example
+          const response = await fetch(
+            "https://httpbin.org/anything/ReadBankingScheduledTransfers.v2",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                accountId: "12345",
+                dateRange: {
+                  start: "2024-01-01",
+                  end: "2024-12-31",
+                },
+                includeMetadata: true,
+              }),
+            }
+          );
           const data = await response.json();
-          log(`✅ Custom API success: ${response.status}`, "success");
+          log(`✅ Function name API success: ${response.status}`, "success");
           log(`Response: ${JSON.stringify(data).substring(0, 100)}...`, "info");
+          log(
+            "Check extension popup - function name 'ReadBankingScheduledTransfers.v2' should be highlighted!",
+            "info"
+          );
         } catch (error) {
-          log(`❌ Custom API error: ${error.message}`, "error");
+          log(`❌ Function name API error: ${error.message}`, "error");
         }
       }
 

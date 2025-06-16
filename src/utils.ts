@@ -97,3 +97,33 @@ export function truncateUrl(url: string, maxLength: number = 50): string {
   const end = url.substring(url.length - maxLength / 2);
   return `${start}...${end}`;
 }
+
+export function extractFunctionName(url: string): {
+  baseUrl: string;
+  functionName: string;
+} {
+  try {
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname
+      .split("/")
+      .filter((part) => part.length > 0);
+
+    if (pathParts.length === 0) {
+      return { baseUrl: url, functionName: "" };
+    }
+
+    // Get the last part of the path as the function name
+    const functionName = pathParts[pathParts.length - 1];
+
+    // Create base URL without the function name
+    const basePathParts = pathParts.slice(0, -1);
+    const basePath =
+      basePathParts.length > 0 ? "/" + basePathParts.join("/") + "/" : "/";
+    const baseUrl = `${urlObj.protocol}//${urlObj.host}${basePath}`;
+
+    return { baseUrl, functionName };
+  } catch (error) {
+    // If URL parsing fails, return the original URL
+    return { baseUrl: url, functionName: "" };
+  }
+}

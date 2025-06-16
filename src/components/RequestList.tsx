@@ -3,7 +3,7 @@ import { NetworkRequest } from "../types";
 import {
   getMethodColor,
   getStatusColor,
-  truncateUrl,
+  extractFunctionName,
   copyToClipboard,
   formatRequestForCopy,
   formatResponseForCopy,
@@ -104,91 +104,105 @@ export default function RequestList({
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {requests.map((request) => (
-          <div
-            key={request.id}
-            className="border-b border-gray-200 last:border-b-0"
-          >
-            <div
-              className="request-row flex items-center justify-between"
-              onClick={() => onRequestSelect(request)}
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span
-                    className={`method-badge ${getMethodColor(request.method)}`}
+        {requests.map((request) => {
+          const { baseUrl, functionName } = extractFunctionName(request.url);
+
+          return (
+            <div key={request.id} className="last:border-b-0">
+              <div
+                className="request-row flex items-center justify-between"
+                onClick={() => onRequestSelect(request)}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span
+                      className={`method-badge ${getMethodColor(
+                        request.method
+                      )}`}
+                    >
+                      {request.method}
+                    </span>
+                    <span
+                      className={`text-sm font-medium ${getStatusColor(
+                        request.status
+                      )}`}
+                    >
+                      {request.status || "Pending"}
+                    </span>
+                  </div>
+                  <div
+                    className="text-sm text-gray-900 break-all"
+                    title={request.url}
                   >
-                    {request.method}
-                  </span>
-                  <span
-                    className={`text-sm font-medium ${getStatusColor(
-                      request.status
-                    )}`}
-                  >
-                    {request.status || "Pending"}
-                  </span>
+                    {functionName ? (
+                      <>
+                        <span className="text-gray-600">{baseUrl}</span>
+                        <span className="font-semibold text-blue-700 bg-blue-50 px-1 rounded">
+                          {functionName}
+                        </span>
+                      </>
+                    ) : (
+                      <span>{request.url}</span>
+                    )}
+                  </div>
                 </div>
-                <p
-                  className="text-sm text-gray-900 truncate"
-                  title={request.url}
-                >
-                  {truncateUrl(request.url, 60)}
-                </p>
+                <ChevronRight className="text-gray-400 ml-2" size={16} />
               </div>
-              <ChevronRight className="text-gray-400 ml-2" size={16} />
-            </div>
 
-            <div className="px-3 pb-3 flex gap-2">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCopy(
-                    formatRequestForCopy(request),
-                    `req-${request.id}`
-                  );
-                }}
-                className={`copy-button ${
-                  copiedItems.has(`req-${request.id}`) ? "copied" : ""
-                }`}
-                disabled={!request.requestBody}
-                title={
-                  request.requestBody
-                    ? "Copy request payload"
-                    : "No request body"
-                }
-              >
-                <Copy size={12} className="inline mr-1" />
-                {copiedItems.has(`req-${request.id}`)
-                  ? "Copied!"
-                  : "Copy Payload"}
-              </button>
+              <div className="px-3 pb-3 flex gap-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCopy(
+                      formatRequestForCopy(request),
+                      `req-${request.id}`
+                    );
+                  }}
+                  className={`copy-button ${
+                    copiedItems.has(`req-${request.id}`) ? "copied" : ""
+                  }`}
+                  disabled={
+                    !request.requestBody || request.requestBody.trim() === ""
+                  }
+                  title={
+                    request.requestBody && request.requestBody.trim() !== ""
+                      ? "Copy request payload"
+                      : "No request body"
+                  }
+                >
+                  <Copy size={12} className="inline mr-1" />
+                  {copiedItems.has(`req-${request.id}`)
+                    ? "Copied!"
+                    : "Copy Payload"}
+                </button>
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCopy(
-                    formatResponseForCopy(request),
-                    `res-${request.id}`
-                  );
-                }}
-                className={`copy-button ${
-                  copiedItems.has(`res-${request.id}`) ? "copied" : ""
-                }`}
-                disabled={!request.responseBody}
-                title={
-                  request.responseBody
-                    ? "Copy response body"
-                    : "No response body"
-                }
-              >
-                <Copy size={12} className="inline mr-1" />
-                {copiedItems.has(`res-${request.id}`)
-                  ? "Copied!"
-                  : "Copy Response"}
-              </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCopy(
+                      formatResponseForCopy(request),
+                      `res-${request.id}`
+                    );
+                  }}
+                  className={`copy-button ${
+                    copiedItems.has(`res-${request.id}`) ? "copied" : ""
+                  }`}
+                  disabled={!request.responseBody}
+                  title={
+                    request.responseBody
+                      ? "Copy response body"
+                      : "No response body"
+                  }
+                >
+                  <Copy size={12} className="inline mr-1" />
+                  {copiedItems.has(`res-${request.id}`)
+                    ? "Copied!"
+                    : "Copy Response"}
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
