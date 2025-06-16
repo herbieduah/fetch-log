@@ -11,6 +11,22 @@ A powerful Chrome Extension for developers to monitor, filter, and inspect fetch
 - ⚙️ **Customizable settings** with data management
 - 🎨 **Clean, developer-focused UI** with smooth animations
 
+## Screenshots
+
+See the Fetch Log extension in action with these interface demonstrations:
+
+### Main Request List View
+
+The primary interface showing captured API requests with real-time loading indicators, function name highlighting, and filtering capabilities.
+
+![API Request List](src/assets/apiList.png)
+
+### Detailed Request Inspection
+
+Comprehensive view of individual requests showing headers, payload, response data, and copy functionality.
+
+![API Request Details](src/assets/apiDetails.png)
+
 ## Tech Stack
 
 - **React 18** with functional components and hooks
